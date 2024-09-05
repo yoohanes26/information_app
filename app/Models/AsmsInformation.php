@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,16 +48,11 @@ class AsmsInformation extends Model
     public function format(){
         return [
             'information_title' => $this->information_title,
-            'information_kbn' => $this->information_kbn,
-            'keisai_ymd' => $this->keisai_ymd,
-            'enable_start_ymd' => $this->enable_start_ymd,
-            'enable_end_ymd' => $this->enable_end_ymd,
-            'information_naiyo' => $this->information_naiyo,
-            'delete_flg' => $this->delete_flg,
-            'create_user_cd' => $this->create_user_cd,
-            'create_time' => $this->create_time,
-            'update_user_cd' => $this->update_user_cd,
-            'update_time' => $this->update_time,
+            'information_kbn' => $this->information_kbn ? '情報' : '重要',
+            'keisai_ymd' => Carbon::parse($this->keisai_ymd)->format('Y/m/d'),
+            'enable_ymd' => Carbon::parse($this->enable_start_ymd)->format('Y/m/d') . " ～ " . Carbon::parse($this->enable_end_ymd)->format('Y/m/d'),
+//            'enable_end_ymd' => Carbon::parse($this->enable_end_ymd)->format('Y/m/d'),
+//            'information_naiyo' => $this->information_naiyo,
         ];
     }
 }

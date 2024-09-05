@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string("enable_start_ymd", length: 8);
             $table->string("enable_end_ymd", length: 8);
             $table->text("information_naiyo");
-            $table->boolean("delete_flg");
+            $table->boolean("delete_flg")->default(false);
             $table->unsignedBigInteger("create_user_cd");
             $table->timestamp("create_time")->nullable();
             $table->unsignedBigInteger("update_user_cd");
