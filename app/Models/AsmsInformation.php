@@ -47,12 +47,15 @@ class AsmsInformation extends Model
     // データをJSONフォーマットで返す
     public function format(){
         return [
+            'information_id' => $this->information_id,
             'information_title' => $this->information_title,
-            'information_kbn' => $this->information_kbn ? '情報' : '重要',
+            'information_kbn' => $this->information_kbn,
+            'information_kbn_text' => $this->information_kbn ? '情報' : '重要',
             'keisai_ymd' => Carbon::parse($this->keisai_ymd)->format('Y/m/d'),
             'enable_ymd' => Carbon::parse($this->enable_start_ymd)->format('Y/m/d') . " ～ " . Carbon::parse($this->enable_end_ymd)->format('Y/m/d'),
-//            'enable_end_ymd' => Carbon::parse($this->enable_end_ymd)->format('Y/m/d'),
-//            'information_naiyo' => $this->information_naiyo,
+            'enable_start_ymd' => Carbon::parse($this->enable_start_ymd)->format('Y/m/d'),
+            'enable_end_ymd' => Carbon::parse($this->enable_end_ymd)->format('Y/m/d'),
+            'information_naiyo' => $this->information_naiyo,
         ];
     }
 }
