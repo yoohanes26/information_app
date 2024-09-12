@@ -223,7 +223,7 @@ class InitInformationSeeder extends Seeder
                 'information_kbn' => '0',
                 'keisai_ymd' => '20240901',
                 'enable_start_ymd' => '20240901',
-                'enable_end_ymd' => '20240909',
+                'enable_end_ymd' => '20240913',
                 'information_naiyo' => 'これは警告第' . $alert_number++ . '号です。',
                 'delete_flg' => 0,
                 'create_user_cd' => 1,

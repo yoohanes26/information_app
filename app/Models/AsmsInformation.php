@@ -14,6 +14,10 @@ class AsmsInformation extends Model
     // エンティティのテーブル名
     protected $table = 'asms_informations';
 
+    public $timestamps = false;
+
+    protected $primaryKey = 'information_id';
+
     // 入力できるフィールドをここに定義
     protected $fillable = [
         'information_title',

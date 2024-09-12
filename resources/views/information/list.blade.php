@@ -53,7 +53,7 @@
     </style>
 
     <script src="/global_assets/js/plugins/tables/datatables/datatables.min.js"></script>
-    <script src="../../../../global_assets/js/plugins/tables/datatables/extensions/select.min.js"></script>
+    <script src="/global_assets/js/plugins/tables/datatables/extensions/select.min.js"></script>
 {{--        <script src="/global_assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>--}}
     <script src="/global_assets/js/plugins/forms/selects/select2.min.js"></script>
     <script src="/global_assets/js/plugins/notifications/sweet_alert.min.js"></script>
@@ -67,35 +67,6 @@
     <script src="/global_assets/js/plugins/forms/validation/additional_methods.min.js"></script>
 
     <script type="text/javascript">
-        var NotyJgrowl = function() {
-            //
-            // Setup module components
-            //
-
-            // Noty.js examples
-            var _componentNoty = function() {
-                if (typeof Noty == 'undefined') {
-                    console.warn('Warning - noty.min.js is not loaded.');
-                    return;
-                }
-
-                // Override Noty defaults
-                Noty.overrideDefaults({
-                    theme: 'limitless',
-                    layout: 'topRight',
-                    type: 'alert',
-                    timeout: 2500
-                });
-            }
-
-            return {
-                init: function() {
-                    _componentNoty();
-                }
-            }
-        }();
-
-
         var FormValidation = function() {
 
             // Uniform
@@ -119,7 +90,7 @@
                 }
 
                 // Initialize
-                var validator_create_admin = $('.form-create-department').validate({
+                var validator_create_information = $('.form_create_information').validate({
                     ignore: 'input[type=hidden], .select2-search__field', // ignore hidden fields
                     errorClass: 'validation-invalid-label',
                     successClass: 'validation-valid-label',
@@ -131,7 +102,7 @@
                         $(element).removeClass(errorClass);
                     },
                     success: function(label) {
-                        label.addClass('validation-valid-label').text('Success.'); // remove to hide Success message
+                        label.addClass('validation-valid-label').text('入力は正しい。'); // remove to hide Success message
                     },
 
                     // Different components require proper error label placement
@@ -158,30 +129,30 @@
                         }
                     },
                     rules: {
-                        password: {
-                            pattern: /^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/
-                        },
-                        password_confirmation: {
-                            equalTo: '#password_create_admin'
-                        },
-                        email: {
-                            email: true,
-                            remote: {
-                                headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"},
-                                url: '/admins/check_email_dupe',
-                                type: 'post',
-                            }
+                        information_title: {
+                            // required: true
                         },
                     },
                     messages: {
-                        password: {
-                            pattern: 'Password must contain at least one upper-case letter, one lower-case letter, one number, one special character, and length at least 8.'
-                        }
+                        information_title: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        keisai_ymd: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        enable_start_ymd: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        enable_end_ymd: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        information_naiyo: {
+                            required: 'このフィールドは必須です。'
+                        },
                     }
                 });
 
-
-                var validator_change_password = $('.form-change-password').validate({
+                var validator_update_information = $('.form_update_information').validate({
                     ignore: 'input[type=hidden], .select2-search__field', // ignore hidden fields
                     errorClass: 'validation-invalid-label',
                     successClass: 'validation-valid-label',
@@ -193,7 +164,7 @@
                         $(element).removeClass(errorClass);
                     },
                     success: function(label) {
-                        label.addClass('validation-valid-label').text('Success.'); // remove to hide Success message
+                        label.addClass('validation-valid-label').text('入力は正しい。'); // remove to hide Success message
                     },
 
                     // Different components require proper error label placement
@@ -220,17 +191,26 @@
                         }
                     },
                     rules: {
-                        password: {
-                            pattern: /^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\d]){1,})(?=(.*[\W]){1,})(?!.*\s).{8,}$/
-                        },
-                        password_confirmation: {
-                            equalTo: '#password_field'
+                        information_title: {
+                            // required: true
                         },
                     },
                     messages: {
-                        password: {
-                            pattern: 'Password must contain at least one upper-case letter, one lower-case letter, one number, one special character, and length at least 8.'
-                        }
+                        information_title: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        keisai_ymd: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        enable_start_ymd: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        enable_end_ymd: {
+                            required: 'このフィールドは必須です。'
+                        },
+                        information_naiyo: {
+                            required: 'このフィールドは必須です。'
+                        },
                     }
                 });
             };
@@ -354,20 +334,26 @@
         // ------------------------------
 
         document.addEventListener('DOMContentLoaded', function() {
-            NotyJgrowl.init();
             DatatableCustomButtonWithSearch.init();
             FormValidation.init();
         });
 
         $(function(){
             $('#btn-create-info').click(function(){
-                $('#form-create-information')[0].reset();
+                // フィールドを初期化
+                $('#form_create_information')[0].reset();
+
+                // アラートなどを削除
+                $('#form_create_information .validation-invalid-label').remove();
+
+                // モーダルを表示
                 $('#modal-create').modal();
             });
 
             $('#btn-update-info').click(function(){
                 table = $('.datatable-button-init-custom').DataTable();
 
+                // フィールドを選択された項目の内容に初期化
                 $('#information_id_update_form').val(table.rows({selected:true}).data()[0].information_id);
                 $('#information_title_update_form').val(table.rows({selected:true}).data()[0].information_title);
                 $('#information_kbn_update_form').val(table.rows({selected:true}).data()[0].information_kbn);
@@ -375,11 +361,16 @@
                 $('#enable_start_ymd_update_form').val(formatDate(table.rows({selected:true}).data()[0].enable_start_ymd));
                 $('#enable_end_ymd_update_form').val(formatDate(table.rows({selected:true}).data()[0].enable_end_ymd));
                 $('#information_naiyo_update_form').val(table.rows({selected:true}).data()[0].information_naiyo);
-;
+
+                // アラートなどを削除
+                $('#form-update-information .validation-invalid-label').remove();
+
+                // モーダルを表示
                 $('#modal-update').modal();
             });
 
             $('#btn-delete-info').click(function(){
+                $('#information_id_delete_form').val($('.datatable-button-init-custom').DataTable().rows({selected:true}).data()[0].information_id);
                 $('#modal-delete').modal();
             });
 
@@ -397,105 +388,189 @@
 
                 return [year, month, day].join('-');
             }
+
+            function formatDateDisplay(date) {
+                var d = new Date(date);
+
+                month = '' + (d.getMonth() + 1);
+                day = '' + d.getDate();
+                year = d.getFullYear();
+
+                if (month.length < 2)
+                    month = '0' + month;
+                if (day.length < 2)
+                    day = '0' + day;
+
+                return [year, month, day].join('/');
+            }
+
+            $('#form_information_search').submit(function(e){
+                e.preventDefault();
+
+                table = $('.datatable-button-init-custom').DataTable();
+
+                table.columns(0).search($('#information_title_search').val());
+
+                var kbn;
+                console.log($('#information_kbn_search').val());
+                switch ($('#information_kbn_search').val()){
+                    case '0':
+                        kbn = '重要'
+                        break;
+                    case '1':
+                        kbn = '情報'
+                        break;
+                    default:
+                        kbn = ''
+                        break;
+                }
+
+                table.columns(1).search(kbn);
+
+                keisai_ymd = '';
+                if($('#information_keisai_ymd_search').val())
+                    keisai_ymd = formatDateDisplay($('#information_keisai_ymd_search').val());
+
+                table.columns(2).search(keisai_ymd);
+
+                enable_ymd = '';
+
+                if($('#information_enable_start_ymd_search').val())
+                    enable_ymd += formatDateDisplay($('#information_enable_start_ymd_search').val());
+
+                enable_ymd += ' ～ ';
+
+                if($('#information_enable_end_ymd_search').val())
+                    enable_ymd += formatDateDisplay($('#information_enable_end_ymd_search').val());
+
+                table.columns(3).search(enable_ymd);
+
+                table.draw();
+            });
         });
     </script>
 </head>
 
-<!-- ページコンテンツ -->
-<div class="page-content">
-    <!-- メインコンテンツ -->
-    <div class="content-wrapper">
-
-        <!-- コンテンツエリア -->
-        <div class="content pt-0">
-            <div class="card">
-                <div class="card-header header-elements-inline">
-                    <h5 class="card-title">お知らせ一覧</h5>
+<!-- Main content -->
+<div class="content-wrapper">
+    <!-- Page header -->
+    <div class="page-header border-bottom-0">
+        <div class="page-header-content header-elements-md-inline">
+            <div class="page-title d-flex">
+                <h4><span class="font-weight-semibold">お知らせ一覧</span></h4>
+            </div>
+        </div>
+        @if(null !== Session::get('successMessage'))
+            <div class="page-header-content">
+                <div class="alert alert-success alert-styled-left alert-arrow-left alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                    {{Session::get('successMessage')}}
                 </div>
+            </div>
+        @endif
+        @if(null !== Session::get('errorMessage'))
+            <div class="page-header-content">
+                <div class="alert alert-danger alert-styled-left alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                    {{Session::get('errorMessage')}}
+                </div>
+            </div>
+        @endif
+    </div>
+    <!-- /page header -->
+    <!-- ページコンテンツ -->
+    <div class="page-content">
+        <!-- メインコンテンツ -->
+        <div class="content-wrapper">
 
-                <div class="card-body">
-                    <form action="#">
-                        <fieldset class="mb-3">
-                            <legend class="text-uppercase font-size-sm font-weight-bold">検索機能</legend>
+            <!-- コンテンツエリア -->
+            <div class="content pt-0">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="#" id="form_information_search">
+                            <fieldset class="mb-3">
+                                <legend class="text-uppercase font-size-sm font-weight-bold">検索機能</legend>
 
-                            <div class="form-group row">
-                                <label class="col-form-label col-lg-2">お知らせタイトル</label>
-                                <div class="col-lg-2">
-                                    <input type="text" class="form-control">
+                                <div class="form-group row">
+                                    <label class="col-form-label col-lg-2">お知らせタイトル</label>
+                                    <div class="col-lg-2">
+                                        <input type="text" class="form-control" name="information_title_search" id="information_title_search" placeholder="お知らせタイトル">
+                                    </div>
+
+                                    <label class="col-form-label col-lg-2">お知らせ区分</label>
+                                    <div class="col-lg-2">
+                                        <select class="form-control" name="information_kbn_search" id="information_kbn_search">
+                                            <option value="2" selected>-</option>
+                                            <option value="0">重要</option>
+                                            <option value="1">情報</option>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <label class="col-form-label col-lg-2">お知らせ区分</label>
-                                <div class="col-lg-2">
-                                    <select class="form-control">
-                                        <option>-</option>
-                                        <option value="0">重要</option>
-                                        <option value="1">情報</option>
-                                    </select>
-                                </div>
-                            </div>
+                                <div class="form-group row">
+                                    <label class="col-form-label col-lg-2">掲載日</label>
+                                    <div class="col-lg-2">
+                                        <input class="form-control" type="date" name="keisai_ymd" id="information_keisai_ymd_search">
+                                    </div>
 
-                            <div class="form-group row">
-                                <label class="col-form-label col-lg-2">掲載日</label>
-                                <div class="col-lg-2">
-                                    <input class="form-control" type="date" name="date">
-                                </div>
+                                    <label class="col-form-label col-lg-2">適用期間</label>
+                                    <div class="col-lg-2">
+                                        <input class="form-control" type="date" name="enable_start_ymd" id="information_enable_start_ymd_search">
+                                    </div>
+                                    <label class="col-form-label">～</label>
+                                    <div class="col-lg-2">
+                                        <input class="form-control" type="date" name="enable_end_ymd" id="information_enable_end_ymd_search">
+                                    </div>
 
-                                <label class="col-form-label col-lg-2">適用期間</label>
-                                <div class="col-lg-2">
-                                    <input class="form-control" type="date" name="date">
+                                    <div class="col-lg-1 text-right">
+                                        <button type="submit" class="btn btn-primary">検索</button>
+                                    </div>
                                 </div>
-                                <label class="col-form-label">～</label>
-                                <div class="col-lg-2">
-                                    <input class="form-control" type="date" name="date">
-                                </div>
+                            </fieldset>
+                        </form>
 
-                                <div class="col-lg-1 text-right">
-                                    <button type="submit" class="btn btn-primary">検索</button>
-                                </div>
-                            </div>
-                        </fieldset>
-                    </form>
+                        <table class="table datatable-button-init-custom">
+                            <thead>
+                            <tr>
+                                @php
+                                    foreach ($column_names as $key => $value){
+                                        echo "<th>$value</th>";
+                                    }
+                                @endphp
+                            </tr>
+                            </thead>
+                        </table>
 
-                    <table class="table datatable-button-init-custom">
-                        <thead>
-                        <tr>
-                            @php
-                                foreach ($column_names as $key => $value){
-                                    echo "<th>$value</th>";
-                                }
-                            @endphp
-                        </tr>
-                        </thead>
-                    </table>
-
-                    <div class="form-group row">
-                        <button class="col-lg-1 btn bg-primary btn-labeled" id="btn-create-info">登録</button>
-                        <div class="col-lg-2"></div>
-                        <button class="col-lg-1 btn bg-teal-400 btn-labeled disabled" id="btn-update-info" disabled>変更</button>
-                        <div class="col-lg-2"></div>
-                        <button class="col-lg-1 btn bg-danger btn-labeled disabled" id="btn-delete-info" disabled>削除</button>
+                        <div class="form-group row">
+                            <button class="col-lg-1 btn bg-primary btn-labeled" id="btn-create-info">登録</button>
+                            <div class="col-lg-2"></div>
+                            <button class="col-lg-1 btn bg-teal-400 btn-labeled disabled" id="btn-update-info" disabled>変更</button>
+                            <div class="col-lg-2"></div>
+                            <button class="col-lg-1 btn bg-danger btn-labeled disabled" id="btn-delete-info" disabled>削除</button>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- /コンテンツエリア -->
+
+
+
+
         </div>
-        <!-- /コンテンツエリア -->
-
-
-        <!-- フッター -->
-        <div class="navbar navbar-expand-lg navbar-light">
-            <div class="navbar-collapse collapse" id="navbar-footer">
-					<span class="navbar-text">
-						お知らせ設定
-					</span>
-            </div>
-        </div>
-        <!-- /フッター -->
-
+        <!-- /メインコンテンツ -->
     </div>
-    <!-- /メインコンテンツ -->
-
+    <!-- /ページコンテンツ -->
+    <!-- フッター -->
+    <div class="navbar navbar-expand-lg navbar-light">
+        <div class="navbar-collapse collapse" id="navbar-footer">
+                        <span class="navbar-text">
+                            お知らせ設定
+                        </span>
+        </div>
+    </div>
+    <!-- /フッター -->
 </div>
-<!-- /ページコンテンツ -->
+<!-- /main content -->
 
 <!-- ロードモーダル -->
 <div id="modal-loading" class="modal" tabindex='-1'>
@@ -510,7 +585,7 @@
 
 <!-- 登録フォームのモーダル -->
 <div id="modal-create" class="modal fade" tabindex='-1'>
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header header-elements-inline">
                 <h5 class="modal-title">お知らせ新規登録</h5>
@@ -518,10 +593,9 @@
             </div>
             <hr>
 
-            <form action="" method="POST" id="form-create-information" class="form-horizontal">
+            <form action="/information" method="POST" id="form_create_information" class="form-horizontal form_create_information">
                 @csrf
                 <div class="modal-body">
-                    <input type="hidden" name="id_department" id="id_department">
                     <div class="form-group row">
                         <label class="col-form-label col-lg-3">お知らせタイトル <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
@@ -558,7 +632,7 @@
                     <div class="form-group row">
                         <label class="col-form-label col-lg-3">お知らせ内容 <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
-                            <textarea rows="3" cols="3" name="information_naiyo" class="form-control" placeholder="お知らせ内容"></textarea>
+                            <textarea rows="3" cols="3" name="information_naiyo" class="form-control" placeholder="お知らせ内容" required></textarea>
                         </div>
                     </div>
                 </div>
@@ -577,7 +651,7 @@
 
 <!-- 変更フォームのモーダル -->
 <div id="modal-update" class="modal fade" tabindex='-1'>
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header header-elements-inline">
                 <h5 class="modal-title">お知らせ変更</h5>
@@ -585,7 +659,7 @@
             </div>
             <hr>
 
-            <form action="" method="POST" id="form-update-information" class="form-horizontal">
+            <form action="/information/edit" method="POST" id="form_update_information" class="form-horizontal form_update_information">
                 @csrf
                 <div class="modal-body">
                     <input type="hidden" name="information_id" id="information_id_update_form">
@@ -625,7 +699,7 @@
                     <div class="form-group row">
                         <label class="col-form-label col-lg-3">お知らせ内容 <span class="text-danger">*</span></label>
                         <div class="col-lg-9">
-                            <textarea rows="3" cols="3" name="information_naiyo" class="form-control" id="information_naiyo_update_form" placeholder="お知らせ内容"></textarea>
+                            <textarea rows="3" cols="3" name="information_naiyo" class="form-control" id="information_naiyo_update_form" placeholder="お知らせ内容" required></textarea>
                         </div>
                     </div>
                 </div>
@@ -643,11 +717,24 @@
 <!-- /変更フォームのモーダル -->
 
 <!-- 削除警告のモーダル -->
-<div id="modal-delete" class="modal fade" tabindex='-1'>
-    <div class="pace-demo bg-dark h-100 w-100">
-        <div class="theme_tail theme_tail_circle">
-            <div class="pace_progress" data-progress-text="60%" data-progress="60"></div>
-            <div class="pace_activity"></div>
+<div id="modal-delete" class="modal fade align-content-center" tabindex='-1'>
+    <div class='modal-dialog modal-xs center'>
+        <div class='modal-content'>
+            <div class='modal-body'>
+                <h3 class="d-flex justify-content-center" style="margin: auto; padding-bottom: 10%">削除してもよろしいですか?</h3>
+                <div class="text-right">
+                    <form action="/information/delete" id="form_delete_information" method="POST">
+                        @csrf
+
+                        <input type="hidden" id="information_id_delete_form" name="information_id">
+
+                        <div class="text-right">
+                            <button type='button' class='btn btn-link' data-dismiss='modal'>いいえ</button>
+                            <button type="submit" class="btn btn-danger">はい</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

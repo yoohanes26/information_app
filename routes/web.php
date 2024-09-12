@@ -6,6 +6,6 @@ $router->group(['namespace' => '\App\Http\Controllers'], function() use ($router
     Route::get('/', 'InformationController@homepage');
     Route::get('/information', 'InformationController@getInformation');
     Route::post('/information', 'InformationController@createInformation');
-    Route::put('/information', 'InformationController@editInformation');
-    Route::delete('/information', 'InformationController@deleteInformation');
+    Route::post('/information/edit', 'InformationController@editInformation');
+    Route::post('/information/delete', 'InformationController@deleteInformation');
 });

@@ -33,7 +33,13 @@ class InformationController extends Controller
     }
 
     public function createInformation(Request $request){
-        $validator = Validator::make($request->all(), [
+        $data = $request->only('information_title', 'information_kbn', 'keisai_ymd', 'enable_start_ymd', 'enable_end_ymd', 'information_naiyo');
+
+        $data['keisai_ymd'] = str_replace('-', '', $data['keisai_ymd']);
+        $data['enable_start_ymd'] = str_replace('-', '', $data['enable_start_ymd']);
+        $data['enable_end_ymd'] = str_replace('-', '', $data['enable_end_ymd']);
+
+        $validator = Validator::make($data, [
             'information_title' => 'required|string',
             'information_kbn' => 'required|boolean',
             'keisai_ymd' => 'required|date_format:Ymd',
@@ -43,10 +49,8 @@ class InformationController extends Controller
         ]);
 
         if($validator->fails()){
-            return response()->json($validator->errors(), 422);
+            return redirect()->back()->with('errorMessage', 'データが無効です。もう一度送信してください。');
         }
-
-        $data = $request->only('information_title', 'information_kbn', 'keisai_ymd', 'enable_start_ymd', 'enaable_end_ymd', 'information_naiyo');
 
         $data['create_user_cd'] = 1;
         $data['create_time'] = Carbon::now();
@@ -56,13 +60,19 @@ class InformationController extends Controller
         $modelInformation = AsmsInformation::create($data);
 
         if($modelInformation)
-            return response()->json(['success' => true, 'message' => 'お知らせの登録が成功しましいた。'], 201);
-        return response()->json(['success' => false, 'message' => 'お知らせの登録が失敗しました。'], 500);
+            return redirect()->back()->with('successMessage', 'お知らせ新規登録が成功しました。');
+        return redirect()->back()->with('errorMessage', 'データが無効です。もう一度送信してください。');
     }
 
     public function editInformation(Request $request){
-        $validator = Validator::make($request->all(), [
-            'information_id' => 'required|exists:asms_informations,id',
+        $data = $request->only('information_id', 'information_title', 'information_kbn', 'keisai_ymd', 'enable_start_ymd', 'enable_end_ymd', 'information_naiyo');
+
+        $data['keisai_ymd'] = str_replace('-', '', $data['keisai_ymd']);
+        $data['enable_start_ymd'] = str_replace('-', '', $data['enable_start_ymd']);
+        $data['enable_end_ymd'] = str_replace('-', '', $data['enable_end_ymd']);
+
+        $validator = Validator::make($data, [
+            'information_id' => 'required|exists:asms_informations,information_id',
             'information_title' => 'required|string',
             'information_kbn' => 'required|boolean',
             'keisai_ymd' => 'required|date_format:Ymd',
@@ -72,34 +82,32 @@ class InformationController extends Controller
         ]);
 
         if($validator->fails()){
-            return response()->json($validator->errors(), 422);
+            return redirect()->back()->with('errorMessage', 'データが無効です。もう一度送信してください。');
         }
 
-        $modelInformation = AsmsInformation::find($request->information_id);
-
-        $data = $request->only('information_title', 'information_kbn', 'keisai_ymd', 'enable_start_ymd', 'enaable_end_ymd', 'information_naiyo');
+        $modelInformation = AsmsInformation::find($data['information_id']);
 
         $data['update_user_cd'] = 1;
         $data['update_time'] = Carbon::now();
 
         if($modelInformation->update($data))
-            return response()->json(['success' => true, 'message' => 'お知らせの変更が成功しましいた。']);
-        return response()->json(['success' => false, 'message' => 'お知らせの変更が失敗しました。'], 500);
+            return redirect()->back()->with('successMessage', 'お知らせの変更が成功しましいた。');
+        return redirect()->back()->with('errorMessage', 'データが無効です。もう一度送信してください。');
     }
 
     public function deleteInformation(Request $request){
         $validator = Validator::make($request->all(), [
-            'information_id' => 'required|exists:asms_informations,id'
+            'information_id' => 'required|exists:asms_informations,information_id'
         ]);
 
         if($validator->fails()){
-            return response()->json($validator->errors(), 422);
+            return redirect()->back()->with('errorMessage', 'データが無効です。もう一度送信してください。');
         }
 
         $modelInformation = AsmsInformation::find($request->information_id)->update(['delete_flg' => 1]);
 
         if($modelInformation)
-            return response()->json(['success' => true, 'message' => 'お知らせの削除が成功しましいた。']);
-        return response()->json(['success' => false, 'message' => 'お知らせの削除が失敗しました。'], 500);
+            return redirect()->back()->with('successMessage', 'お知らせの削除が成功しましいた。');
+        return redirect()->back()->with('errorMessage', 'データが無効です。もう一度送信してください。');
     }
 }
