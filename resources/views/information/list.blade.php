@@ -11,7 +11,7 @@
 
     <!-- Global stylesheets -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="/global_assets/css/icons/icomoon/styles.min.css" rel="stylesheet" type="text/css">
     <link href="/global_assets/css/icons/fontawesome/styles.min.css" rel="stylesheet" type="text/css">
     <link href="/assets/css/bootstrap.min.css" rel="stylesheet" type="text/css">
@@ -54,7 +54,8 @@
 
     <script src="/global_assets/js/plugins/tables/datatables/datatables.min.js"></script>
     <script src="/global_assets/js/plugins/tables/datatables/extensions/select.min.js"></script>
-{{--        <script src="/global_assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>--}}
+{{--        <script src="https://cdn.datatables.net/v/bs5/dt-2.1.6/sl-2.1.0/datatables.min.js"></script>--}}
+    {{--        <script src="/global_assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>--}}
     <script src="/global_assets/js/plugins/forms/selects/select2.min.js"></script>
     <script src="/global_assets/js/plugins/notifications/sweet_alert.min.js"></script>
     <script src="/global_assets/js/plugins/forms/validation/validate.min.js"></script>
@@ -250,15 +251,15 @@
 
                 // DataTablesのプロパティを定義
                 var table = $('.datatable-button-init-custom').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/2.1.5/i18n/ja.json',
-                    },
+                    // language: {
+                    //     url: '//cdn.datatables.net/plug-ins/2.1.5/i18n/ja.json',
+                    // },
                     order: [0, "asc"],
                     processing: true,
                     serverSide: true,
                     ajax: "/information",
                     pageLength: 100,
-                    scrollCollapse: true,
+                    // scrollCollapse: true,
                     scrollY: '500px',
                     select: {
                         style: 'single'
@@ -276,26 +277,21 @@
                     // console.log(table.rows({selected:true}).data()[0].information_id);
                     $('#btn-update-info').removeClass('disabled');
                     $('#btn-delete-info').removeClass('disabled');
+                    $('#btn-detail-info').removeClass('disabled');
                     $('#btn-update-info').attr('disabled', false);
                     $('#btn-delete-info').attr('disabled', false);
+                    $('#btn-detail-info').attr('disabled', false);
                 });
 
                 // お知らせ項目が選択が外された時に「変更」と「削除」ボタンを無効
                 table.on('deselect.dt', function () {
                     $('#btn-update-info').addClass('disabled');
                     $('#btn-delete-info').addClass('disabled');
+                    $('#btn-detail-info').addClass('disabled');
                     $('#btn-update-info').attr('disabled', true);
                     $('#btn-delete-info').attr('disabled', true);
+                    $('#btn-detail-info').attr('disabled', true);
                 });
-
-                $('.table input').not('.toggle-frozen').on('keyup change', function (event){
-                    // if(event.keyCode == 13)
-                    filterColumn($(this).parents('td').attr('data-column'));
-                });
-
-                function filterColumn ( i ) {
-                    table.column( i ).search($('#col'+i+'_filter').val()).draw();
-                }
             };
 
             // Select2 for length menu styling
@@ -374,6 +370,25 @@
                 $('#modal-delete').modal();
             });
 
+            $('#btn-detail-info').click(function(){
+                table = $('.datatable-button-init-custom').DataTable();
+
+                enable_ymd = formatDate(table.rows({selected:true}).data()[0].enable_start_ymd) + ' ～ ' + formatDate(table.rows({selected:true}).data()[0].enable_end_ymd);
+
+                // フィールドを選択された項目の内容に初期化
+                $('#information_title_detail').html(table.rows({selected:true}).data()[0].information_title);
+                $('#information_kbn_detail').html(table.rows({selected:true}).data()[0].information_kbn);
+                $('#keisai_ymd_detail').html(formatDate(table.rows({selected:true}).data()[0].keisai_ymd));
+                $('#enable_ymd_detail').html(enable_ymd);
+                $('#information_naiyo_detail').html(table.rows({selected:true}).data()[0].information_naiyo);
+
+                // アラートなどを削除
+                $('#form-update-information .validation-invalid-label').remove();
+
+                // モーダルを表示
+                $('#modal-detail').modal();
+            });
+
             function formatDate(date) {
                 var d = new Date(date);
 
@@ -407,12 +422,13 @@
             $('#form_information_search').submit(function(e){
                 e.preventDefault();
 
-                table = $('.datatable-button-init-custom').DataTable();
+                // table = $('.datatable-button-init-custom').DataTable();
+                table = new DataTable('.datatable-button-init-custom');
 
                 table.columns(0).search($('#information_title_search').val());
 
                 var kbn;
-                console.log($('#information_kbn_search').val());
+
                 switch ($('#information_kbn_search').val()){
                     case '0':
                         kbn = '重要'
@@ -433,17 +449,90 @@
 
                 table.columns(2).search(keisai_ymd);
 
-                enable_ymd = '';
+                // enable_ymd = '';
+                //
+                // if($('#information_enable_start_ymd_search').val())
+                //     enable_ymd += formatDateDisplay($('#information_enable_start_ymd_search').val());
+                //
+                // enable_ymd += ' ～ ';
+                //
+                // if($('#information_enable_end_ymd_search').val())
+                //     enable_ymd += formatDateDisplay($('#information_enable_end_ymd_search').val());
 
-                if($('#information_enable_start_ymd_search').val())
-                    enable_ymd += formatDateDisplay($('#information_enable_start_ymd_search').val());
+                // table.columns(3).search(enable_ymd);
 
-                enable_ymd += ' ～ ';
+                table.search.fixed('range', function (searchStr, data, index) {
+                    date_start_search = new Date($('#information_enable_start_ymd_search').val());
+                    date_end_search = new Date($('#information_enable_end_ymd_search').val());
 
-                if($('#information_enable_end_ymd_search').val())
-                    enable_ymd += formatDateDisplay($('#information_enable_end_ymd_search').val());
+                    dates = data[3];
 
-                table.columns(3).search(enable_ymd);
+                    dates = value.split(' ～ ');
+
+                    date_start = new Date(dates[0]);
+                    date_end = new Date(dates[1]);
+
+                    if(search_date_start && !search_date_end){
+                        if(date_start >= search_date_start || date_end >= search_date_start ){
+                            console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
+                            return true;
+                        }
+                    } else if (!search_date_start && search_date_end){
+                        if(date_start <= search_date_start || date_end <= search_date_start ){
+                            console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
+                            return true;
+                        }
+                    } else if(search_date_start && search_date_end){
+
+                    } else {
+                        return true;
+                    }
+                    console.log("false. date_start: " + date_start + ' date_end: ' + date_end);
+                    return false;
+                });
+
+                // table.column(3).data().filter(function(value, index){
+                //     search_date_start = $('#information_enable_start_ymd_search').val();
+                //     search_date_end = $('#information_enable_end_ymd_search').val();
+                //
+                //     dates = value.split(' ～ ');
+                //
+                //     date_start = dates[0];
+                //     date_end = dates[1];
+                //
+                //     if(search_date_start && !search_date_end){
+                //         if(new Date(date_start) >= new Date(search_date_start) || new Date(date_end) >= new Date(search_date_start) ){
+                //             console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
+                //             return true;
+                //         }
+                //     } else if (!search_date_start && search_date_end){
+                //         if(new Date(date_start) <= new Date(search_date_start) || new Date(date_end) <= new Date(search_date_start) ){
+                //             console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
+                //             return true;
+                //         }
+                //     } else if(search_date_start && search_date_end){
+                //
+                //     } else {
+                //         return true;
+                //     }
+                //     console.log("false. date_start: " + date_start + ' date_end: ' + date_end);
+                //     return false;
+                // });
+
+                table.draw();
+            });
+
+            $('#btn-reset-search').click(function(){
+                table = $('.datatable-button-init-custom').DataTable();
+
+                $('#information_title_search').val('');
+
+                $('#information_kbn_search option').removeAttr('selected');
+                $('#information_kbn_search option[value="2"]').attr('selected', 'selected');
+
+                $('#information_keisai_ymd_search').val('');
+                $('#information_enable_start_ymd_search').val('');
+                $('#information_enable_end_ymd_search').val('')
 
                 table.draw();
             });
@@ -524,12 +613,15 @@
 
                                     <div class="col-lg-1 text-right">
                                         <button type="submit" class="btn btn-primary">検索</button>
+                                        <button class="btn btn-danger" id="btn-reset-search">リセット</button>
                                     </div>
+{{--                                    <div class="col-lg-1 text-right">--}}
+{{--                                    </div>--}}
                                 </div>
                             </fieldset>
                         </form>
 
-                        <table class="table datatable-button-init-custom">
+                        <table class="table datatable-button-init-custom" id="datatable-information">
                             <thead>
                             <tr>
                                 @php
@@ -547,6 +639,8 @@
                             <button class="col-lg-1 btn bg-teal-400 btn-labeled disabled" id="btn-update-info" disabled>変更</button>
                             <div class="col-lg-2"></div>
                             <button class="col-lg-1 btn bg-danger btn-labeled disabled" id="btn-delete-info" disabled>削除</button>
+                            <div class="col-lg-2"></div>
+                            <button class="col-lg-1 btn bg-info btn-labeled disabled" id="btn-detail-info" disabled>詳細</button>
                         </div>
                     </div>
                 </div>
@@ -739,3 +833,47 @@
     </div>
 </div>
 <!-- /削除警告のモーダル -->
+
+<!-- お知らせ詳細のモーダル -->
+<div id="modal-detail" class="modal fade" tabindex='-1'>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header header-elements-inline">
+                <h5 class="modal-title">お知らせ詳細</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <hr>
+
+            <div class="modal-body">
+                <input type="hidden" name="information_id" id="information_id_update_form">
+                <div class="form-group row">
+                    <label class="col-form-label col-lg-3 font-weight-bold">お知らせタイトル</label>
+                    <label class="col-form-label col-lg-9" id="information_title_detail"></label>
+                </div>
+                <div class="form-group row">
+                    <label class="col-form-label col-lg-3 font-weight-bold">お知らせ区分</label>
+                    <label class="col-form-label col-lg-9" id="information_kbn_detail"></label>
+                </div>
+                <div class="form-group row">
+                    <label class="col-form-label col-lg-3 font-weight-bold">掲載日</label>
+                    <label class="col-form-label col-lg-9" id="keisai_ymd_detail"></label>
+                </div>
+                <div class="form-group row">
+                    <label class="col-form-label col-lg-3 font-weight-bold">適用期間</label>
+                    <label class="col-form-label col-lg-9" id="enable_ymd_detail"></label>
+                </div>
+                <div class="form-group row">
+                    <label class="col-form-label col-lg-3 font-weight-bold">お知らせ内容</label>
+                    <label class="col-form-label col-lg-9" id="information_naiyo_detail"></label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="text-right">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /お知らせ詳細のモーダル -->
