@@ -90,6 +90,24 @@
                     return;
                 }
 
+                jQuery.validator.addMethod("date_start_check_empty", function(value, element) {
+                    // return this.optional(element) || (parseFloat(value) > 0);
+
+                    $date_start = new Date($('#create_enable_start_ymd').val());
+                    $date_end = new Date($('#create_enable_end_ymd').val());
+
+                    return $date_start < $date_end;
+                }, "終了日は開始日以降である必要があります。");
+
+                jQuery.validator.addMethod("date_end_check", function(value, element) {
+                    // return this.optional(element) || (parseFloat(value) > 0);
+
+                    if($('#create_enable_start_ymd').val())
+                        return true;
+                    return false;
+                }, "適用開始日が必須です。");
+
+
                 // Initialize
                 var validator_create_information = $('.form_create_information').validate({
                     ignore: 'input[type=hidden], .select2-search__field', // ignore hidden fields
@@ -130,8 +148,9 @@
                         }
                     },
                     rules: {
-                        information_title: {
-                            // required: true
+                        enable_end_ymd: {
+                            date_end_check: true,
+                            date_start_check_empty: true,
                         },
                     },
                     messages: {
@@ -152,6 +171,23 @@
                         },
                     }
                 });
+
+                jQuery.validator.addMethod("date_start_check_empty", function(value, element) {
+                    // return this.optional(element) || (parseFloat(value) > 0);
+
+                    $date_start = new Date($('#enable_start_ymd_update_form').val());
+                    $date_end = new Date($('#enable_end_ymd_update_form').val());
+
+                    return $date_start < $date_end;
+                }, "終了日は開始日以降である必要があります。");
+
+                jQuery.validator.addMethod("date_end_check", function(value, element) {
+                    // return this.optional(element) || (parseFloat(value) > 0);
+
+                    if($('#enable_start_ymd_update_form').val())
+                        return true;
+                    return false;
+                }, "適用開始日が必須です。");
 
                 var validator_update_information = $('.form_update_information').validate({
                     ignore: 'input[type=hidden], .select2-search__field', // ignore hidden fields
@@ -192,8 +228,9 @@
                         }
                     },
                     rules: {
-                        information_title: {
-                            // required: true
+                        enable_end_ymd: {
+                            date_end_check: true,
+                            date_start_check_empty: true,
                         },
                     },
                     messages: {
@@ -422,8 +459,8 @@
             $('#form_information_search').submit(function(e){
                 e.preventDefault();
 
-                // table = $('.datatable-button-init-custom').DataTable();
-                table = new DataTable('.datatable-button-init-custom');
+                table = $('.datatable-button-init-custom').DataTable();
+                // table = new DataTable('.datatable-button-init-custom');
 
                 table.columns(0).search($('#information_title_search').val());
 
@@ -449,47 +486,47 @@
 
                 table.columns(2).search(keisai_ymd);
 
-                // enable_ymd = '';
+                enable_ymd = '';
+
+                if($('#information_enable_start_ymd_search').val())
+                    enable_ymd += formatDateDisplay($('#information_enable_start_ymd_search').val());
+
+                enable_ymd += ' ～ ';
+
+                if($('#information_enable_end_ymd_search').val())
+                    enable_ymd += formatDateDisplay($('#information_enable_end_ymd_search').val());
+
+                table.columns(3).search(enable_ymd);
+
+                // table.search.fixed('range', function (searchStr, data, index) {
+                //     date_start_search = new Date($('#information_enable_start_ymd_search').val());
+                //     date_end_search = new Date($('#information_enable_end_ymd_search').val());
                 //
-                // if($('#information_enable_start_ymd_search').val())
-                //     enable_ymd += formatDateDisplay($('#information_enable_start_ymd_search').val());
+                //     dates = data[3];
                 //
-                // enable_ymd += ' ～ ';
+                //     dates = value.split(' ～ ');
                 //
-                // if($('#information_enable_end_ymd_search').val())
-                //     enable_ymd += formatDateDisplay($('#information_enable_end_ymd_search').val());
-
-                // table.columns(3).search(enable_ymd);
-
-                table.search.fixed('range', function (searchStr, data, index) {
-                    date_start_search = new Date($('#information_enable_start_ymd_search').val());
-                    date_end_search = new Date($('#information_enable_end_ymd_search').val());
-
-                    dates = data[3];
-
-                    dates = value.split(' ～ ');
-
-                    date_start = new Date(dates[0]);
-                    date_end = new Date(dates[1]);
-
-                    if(search_date_start && !search_date_end){
-                        if(date_start >= search_date_start || date_end >= search_date_start ){
-                            console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
-                            return true;
-                        }
-                    } else if (!search_date_start && search_date_end){
-                        if(date_start <= search_date_start || date_end <= search_date_start ){
-                            console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
-                            return true;
-                        }
-                    } else if(search_date_start && search_date_end){
-
-                    } else {
-                        return true;
-                    }
-                    console.log("false. date_start: " + date_start + ' date_end: ' + date_end);
-                    return false;
-                });
+                //     date_start = new Date(dates[0]);
+                //     date_end = new Date(dates[1]);
+                //
+                //     if(search_date_start && !search_date_end){
+                //         if(date_start >= search_date_start || date_end >= search_date_start ){
+                //             console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
+                //             return true;
+                //         }
+                //     } else if (!search_date_start && search_date_end){
+                //         if(date_start <= search_date_start || date_end <= search_date_start ){
+                //             console.log("true. date_start: " + date_start + ' date_end: ' + date_end);
+                //             return true;
+                //         }
+                //     } else if(search_date_start && search_date_end){
+                //
+                //     } else {
+                //         return true;
+                //     }
+                //     console.log("false. date_start: " + date_start + ' date_end: ' + date_end);
+                //     return false;
+                // });
 
                 // table.column(3).data().filter(function(value, index){
                 //     search_date_start = $('#information_enable_start_ymd_search').val();
@@ -714,13 +751,13 @@
                     <div class="form-group row">
                         <label class="col-form-label col-lg-3">適用期間 <span class="text-danger">*</span></label>
                         <div class="col-lg-4">
-                            <input type="date" name="enable_start_ymd" class="form-control" required>
+                            <input type="date" name="enable_start_ymd" id="create_enable_start_ymd" class="form-control" required>
                         </div>
                         <div class="col-lg-1 center">
                             <label class="col-form-label">～</label>
                         </div>
                         <div class="col-lg-4">
-                            <input type="date" name="enable_end_ymd" class="form-control" required>
+                            <input type="date" name="enable_end_ymd" id="create_enable_end_ymd" class="form-control" required>
                         </div>
                     </div>
                     <div class="form-group row">
